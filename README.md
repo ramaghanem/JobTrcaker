@@ -1,3 +1,5 @@
+# JobTracker Project
+University project
 # JobTrackr 🧑‍💼💼
 
 > A full-stack web application that streamlines the job search and application process — connecting job seekers with companies in one seamless platform.
