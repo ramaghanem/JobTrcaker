@@ -125,21 +125,19 @@ export default function CompanyDashboard() {
                       </td>
                       <td className="px-6 py-4">
                         <span
-                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold ${
-                            job.status === "open"
-                              ? "bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100"
-                              : job.status === "closed"
+                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold ${job.status === "open"
+                            ? "bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100"
+                            : job.status === "closed"
                               ? "bg-red-50 text-red-500 ring-1 ring-red-100"
                               : "bg-gray-50 text-gray-400 ring-1 ring-gray-100"
-                          }`}
+                            }`}
                         >
-                          <span className={`w-1.5 h-1.5 rounded-full ${
-                            job.status === "open"
-                              ? "bg-emerald-400"
-                              : job.status === "closed"
+                          <span className={`w-1.5 h-1.5 rounded-full ${job.status === "open"
+                            ? "bg-emerald-400"
+                            : job.status === "closed"
                               ? "bg-red-400"
                               : "bg-gray-300"
-                          }`} />
+                            }`} />
                           {job.status}
                         </span>
                       </td>
