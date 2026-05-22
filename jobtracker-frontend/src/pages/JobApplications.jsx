@@ -148,17 +148,15 @@ export default function JobApplications() {
                         </div>
                       </div>
                       <span
-                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold shrink-0 ${
-                          statusStyle[app.status] || statusStyle.pending
-                        }`}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold shrink-0 ${statusStyle[app.status] || statusStyle.pending
+                          }`}
                       >
-                        <span className={`w-1.5 h-1.5 rounded-full ${
-                          app.status === "accepted"
+                        <span className={`w-1.5 h-1.5 rounded-full ${app.status === "accepted"
                             ? "bg-emerald-400"
                             : app.status === "rejected"
-                            ? "bg-red-400"
-                            : "bg-amber-400"
-                        }`} />
+                              ? "bg-red-400"
+                              : "bg-amber-400"
+                          }`} />
                         {app.status}
                       </span>
                     </div>
