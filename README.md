@@ -77,7 +77,7 @@ php artisan storage:link
 php artisan serve
 ```
 
-Then open your browser at **http://localhost:8000**
+
 
 ---
 
