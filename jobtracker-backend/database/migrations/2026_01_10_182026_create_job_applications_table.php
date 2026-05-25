@@ -11,15 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('jobs', function (Blueprint $table) {
+        Schema::create('job_applications', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('company_id')->constrained()->cascadeOnDelete();
-            $table->string('title');
-            $table->text('description');
+            $table->foreignId('job_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->enum('status',['pending','accepted','rejected'])->default('pending');
             $table->string('location');
-            $table->integer('salary');
-            $table->enum('employment_type', ['full-time', 'part-time', 'internship']);
-            $table->enum('status', ['open', 'closed', 'draft'])->default('draft');
+            $table->string('cv');
             $table->timestamps();
         });
     }
@@ -29,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('jobs');
+        Schema::dropIfExists('job_applications');
     }
 };
