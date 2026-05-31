@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Str;
+
 class AuthController extends Controller
 {
     public function register(Request $request)
@@ -55,33 +56,65 @@ class AuthController extends Controller
         ]);
     }
 
-    public function googleRedirect()
+    public function googleRedirect(Request $request)
 {
-    return Socialite::driver('google')->stateless()->redirect();
+    // نأخذ الـ role المختار من الرياكت (إما company أو jobseeker)
+    // إذا لم يختر شيئاً، نضع jobseeker كقيمة افتراضية
+    $role = $request->query('register_role', 'jobseeker');
+
+    // نرسل الـ role والـ prompt إلى جوجل
+    return Socialite::driver('google')
+        ->stateless()
+        ->with([
+            'state' => $role,
+            'prompt' => 'select_account consent' // 👈 هذا السطر المضاف
+        ])
+        ->redirect();
 }
 
-public function googleCallback()
-{
-    $googleUser = Socialite::driver('google')->stateless()->user();
+    public function googleCallback(Request $request)
+    {
+        try {
+            $googleUser = Socialite::driver('google')->stateless()->user();
 
-    $user = User::where('email', $googleUser->email)->first();
+            // فحص هل المستخدم موجود مسبقاً أم لا
+            $user = User::where('email', $googleUser->email)->first();
+            $isNew = !$user; 
 
-    if (!$user) {
-        $user = User::create([
-            'name' => $googleUser->name,
-            'email' => $googleUser->email,
-            'password' => bcrypt(Str::random(16)),
-            'role' => 'jobseeker',
-        ]);
+            if ($isNew) {
+                // هنا السحر! نقرأ الـ state الذي أرسلناه وجاءنا من جوجل لنتعرف على الـ role
+                $chosenRole = $request->query('state', 'jobseeker');
+
+                // إنشاء الحساب المبدئي بالـ role الصحيح تماماً
+                $user = User::create([
+                    'name' => $googleUser->name,
+                    'email' => $googleUser->email,
+                    'password' => bcrypt(Str::random(16)),
+                    'role' => $chosenRole, 
+                ]);
+            }
+
+            // توليد التوكن
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            // تحضير اسم المستخدم ليكون جاهزاً للرابط
+            $name = urlencode($user->name);
+            $isNewStr = $isNew ? 'true' : 'false';
+
+            // إذا كان المستخدم جديداً، نوجهه لصفحة الـ register ليقمل بيانات الشركة إذا كان دورها كذلك
+            if ($isNew) {
+                return redirect()->away("http://localhost:5173/register?token={$token}&role={$user->role}&name={$name}&email={$user->email}&is_new={$isNewStr}");
+            }
+
+            // إذا كان مستخدماً قديماً، يذهب لصفحة الـ login كالمعتاد
+            return redirect()->away("http://localhost:5173/login?token={$token}&role={$user->role}&name={$name}&email={$user->email}&is_new={$isNewStr}");
+
+        } catch (\Exception $e) {
+            return redirect()->away("http://localhost:5173/login?error=Google authentication failed");
+        }
     }
 
-    $token = $user->createToken('auth_token')->plainTextToken;
-
-    return response()->json([
-        'user' => $user,
-        'token' => $token,
-    ]);
-}
+    
 
     public function logout(Request $request)
     {
@@ -90,8 +123,8 @@ public function googleCallback()
     }
 
     public function me(Request $request)
-{
-    $user = $request->user()->load('company');
-    return response()->json($user);
-}
+    {
+        $user = $request->user()->load('company');
+        return response()->json($user);
+    }
 }
